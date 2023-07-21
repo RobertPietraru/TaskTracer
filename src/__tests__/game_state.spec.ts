@@ -1,7 +1,6 @@
-import { test, expect, describe, beforeEach, it, } from "vitest";
+import { expect, describe, beforeEach, it, } from "vitest";
 import { Task, TaskType, useGameStore } from '@/stores/game'
 import { setActivePinia, createPinia } from 'pinia'
-import exp from "constants";
 describe('Game state', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
