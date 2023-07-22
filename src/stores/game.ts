@@ -1,9 +1,32 @@
-// import { ref, computed } from 'vue'
-import { randomUUID } from 'crypto';
 import { defineStore } from 'pinia'
 const randomInt = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
 
+function generateUUID(): string { // Public Domain/MIT
+  var d = new Date().getTime();//Timestamp
+  var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now() * 1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16;//random number between 0 and 16
+    if (d > 0) {//Use timestamp until depleted
+      r = (d + r) % 16 | 0;
+      d = Math.floor(d / 16);
+    } else {//Use microseconds since page-load if supported
+      r = (d2 + r) % 16 | 0;
+      d2 = Math.floor(d2 / 16);
+    }
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+interface TaskCloning {
+  id?: string,
+  title?: string,
+  description?: string,
+  dueDate?: Date,
+  xp?: number,
+  type?: TaskType,
+  difficulty?: number,
+}
 
 class CompletionJob {
   id: string;
@@ -20,10 +43,10 @@ class CompletionJob {
     this.xp = xp;
   }
   durationInSeconds() {
-    var milEndDate : number= this.endDate.valueOf();
-    var milStartDate : number= this.startDate.valueOf();
+    var milEndDate: number = this.endDate.valueOf();
+    var milStartDate: number = this.startDate.valueOf();
     var diffInSeconds = (milEndDate - milStartDate) / 1000
-    if (diffInSeconds < 0){ diffInSeconds = -diffInSeconds}
+    if (diffInSeconds < 0) { diffInSeconds = -diffInSeconds }
     return diffInSeconds;
   }
 
@@ -33,28 +56,22 @@ class CompletionJob {
     let endDate = new Date();
     endDate.setSeconds(endDate.getSeconds() + duration)
 
-    return new CompletionJob(randomUUID(), taskId, currentDate, endDate, xp);
+    return new CompletionJob(generateUUID(), taskId, currentDate, endDate, xp);
 
   }
 }
-let _jobs: CompletionJob[] = [];
-let _inventory: Artifact[] = [];
-let _tasks: Task[] = [];
-let _quests: Task[] = [];
-let _monsters: Task[] = [];
-
 export enum TaskType { monster, quest, userCreated, }
 export class Task {
   id: string;
   title: string;
   description: string;
-  dueDate: Date;
+  dueDate: Date | undefined;
   xp: number;
   type: TaskType;
   difficulty: number;
 
 
-  constructor(id: string, title: string, description: string, dueDate: Date, xp: number, type: TaskType, difficulty: number) {
+  constructor(id: string, title: string, description: string, dueDate: Date | undefined, xp: number, type: TaskType, difficulty: number) {
     this.id = id;
     this.title = title;
     this.description = description;
@@ -64,9 +81,25 @@ export class Task {
     this.difficulty = difficulty;
   }
 
+  copyWith(taskInterface: TaskCloning) {
+    return new Task(
+      taskInterface.id ?? this.id,
+      taskInterface.title ?? this.title,
+      taskInterface.description ?? this.description,
+      taskInterface.dueDate ?? this.dueDate,
+      taskInterface.xp ?? this.xp,
+      taskInterface.type ?? this.type,
+      taskInterface.difficulty ?? this.difficulty,
+    );
+  }
+
   static createRandom(type: TaskType) {
     var xp = randomInt(10, 100);
-    return new Task(randomUUID(), "A title", "descrption", new Date('1995-12-17T03:24:00'), xp, type, xp / 10);
+    return new Task(generateUUID(), "A title", "descrption", new Date('1995-12-17T03:24:00'), xp, type, xp / 10);
+  }
+
+  static createWith(title : string, description :string, duedate : Date | undefined) {
+    return new Task(generateUUID(), title,description, duedate, 0, TaskType.userCreated, 0);
   }
 }
 
@@ -95,15 +128,19 @@ export const useGameStore = defineStore('game', {
     return {
       player: {
         name: "Player",
-        userLevel: 0,
-        userXP: 0,
-        inventory: _inventory,
+        level: 0.0,
+        xp: 0.0,
+        inventory: [new Artifact("asdf", "asdf", 12, ArtifactType.speed), new Artifact("asdf", "asdf", 12, ArtifactType.speed), new Artifact("asdf", "asdf", 12, ArtifactType.speed), new Artifact("asdf", "asdf", 12, ArtifactType.speed), new Artifact("asdf", "asdf", 12, ArtifactType.speed)] as Artifact[],
+        perks: {
+          totalSpeedBoost: 1,
+          totalXPBoost: 1,
+        }
       },
-      tasks: _tasks,
-      jobs: _jobs,
+      tasks: [new Task("", "Fa un dus!!", "Este foarte dificil pentru programator sa faca acesta actiune. Difficulty: Impossible", new Date(), 12, TaskType.userCreated, 1)] as Task[],
+      jobs: [] as CompletionJob[],
       waiting: {
-        quests: _quests,
-        monsters: _monsters
+        quests: [] as Task[],
+        monsters: [] as Task[]
       },
     }
   },
@@ -129,40 +166,47 @@ export const useGameStore = defineStore('game', {
       this.tasks.push(task);
     },
 
-    /// if the task is not user created, then it has a level of difficulty
-    /// option to start completion will only appear on the ones which have a difficulty
-    /// otherwise the user will be able to mark it  as complete directly
-    calculateTaskCompletionTimeAndXP(task: Task) {
-      var totalSpeedValue: number = 0;
-      var totalXPValue: number = 0;
-      this.player.inventory.forEach((e) => {
-        if (e.type == ArtifactType.speed) {
-          totalSpeedValue += e.value;
-        }
-        else {
-          totalXPValue += e.value;
-        }
+    editUserTask(task: Task, title: string, description: string, duedate: Date) {
+      if (task.type != TaskType.userCreated) return;
+      var index = this.tasks.indexOf(task);
+      this.tasks[index] = this.tasks[index].copyWith({
+        title: title,
+        description: description,
+        dueDate: duedate,
       });
+    },
 
-      var time = (task.difficulty * 10) / (totalSpeedValue == 0 ? 1 : totalSpeedValue);
-      var xp = totalXPValue * task.xp;
-
-
-      return {
-        "time": time,
-        "xp": xp,
+    addArtifact(artifact: Artifact) {
+      this.player.inventory.push(artifact);
+      if (artifact.type == ArtifactType.speed) {
+        this.player.perks.totalSpeedBoost += artifact.value;
+      } else {
+        this.player.perks.totalXPBoost += artifact.value;
       }
     },
 
+    /// if the task is not user created, then it has a level of difficulty
+    /// option to start completion will only appear on the ones which have a difficulty
+    /// otherwise the user will be able to mark it  as complete directly
+    calculateCompletionTime(task: Task) {
+      return (task.difficulty * 10) / (this.player.perks.totalSpeedBoost == 0 ? 1 : this.player.perks.totalSpeedBoost);
+
+
+      
+    },
+
+    calculateXP(task: Task) { return this.player.perks.totalXPBoost * task.xp; },
+
     startTaskCompletion(task: Task) {
-      var response = this.calculateTaskCompletionTimeAndXP(task);
-      this.jobs.push(CompletionJob.create(task.id, response.time, response.xp));
+      var time = this.calculateCompletionTime(task);
+      var xp = this.calculateXP(task);
+      this.jobs.push(CompletionJob.create(task.id, time, xp));
     },
 
     /// returns false if it's too early, true if it's ok
     markTaskAsComplete(job: CompletionJob, currentTime: Date) {
       if (job.endDate > currentTime) return false;
-      this.player.userXP += job.xp;
+      this.player.xp += job.xp;
       let indexOfJob = this.jobs.findIndex(e => e.id == job.id);
       if (indexOfJob != undefined) {
         this.jobs.splice(indexOfJob, 1);
@@ -172,8 +216,8 @@ export const useGameStore = defineStore('game', {
       return true;
     },
 
-    createTask(title: string, description: string, dueDate: Date) {
-      var x: string = randomUUID();
+    createTask(title: string, description: string, dueDate: Date | undefined) {
+      var x: string = generateUUID();
       this.tasks.push(new Task(x, title, description, dueDate, 0, TaskType.userCreated, 0));
     }
   },

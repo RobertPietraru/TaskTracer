@@ -7,19 +7,30 @@ describe('Game state', () => {
   })
 
   describe('tasks by user', () => {
+    var task = new Task("a", "potato", "potato", new Date(), 0, TaskType.userCreated, 0);
+
     it('creates a user task properly', () => {
       const game = useGameStore()
-      var task = new Task("a", "potato", "potato", new Date(), 0, TaskType.userCreated, 0);
-      game.createTask("potato", "potato", new Date());
+      game.createTask("potato", "potato", task.dueDate);
       task.id = game.tasks[0].id;
       expect(game.tasks[0]).toEqual(task);
     }),
+
+    it('edits tasks', () => {
+      const game = useGameStore()
+      const taskToEdit = game.tasks[0];
+      var editedTask = new Task("a", 'something else', "potato", task.dueDate, 0, TaskType.userCreated, 0);
+      editedTask.id = game.tasks[0].id;
+      game.editUserTask(taskToEdit, "something else" , taskToEdit.description, taskToEdit.dueDate);
+      expect(game.tasks[0]).toEqual(editedTask);
+    })
 
       it('starts completion on the user task', () => {
         const game = useGameStore()
         game.startTaskCompletion(game.tasks[0]);
         expect(game.jobs.length).toEqual(1);
       }),
+      
 
       it('marks user task as complete', () => {
         const game = useGameStore()
