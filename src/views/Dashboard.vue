@@ -12,13 +12,18 @@ function getDayOfTheWeek(day: number) {
 }
 
 var showModal = ref(false);
-function close() {
-    if (taskCreation.title == "" || taskCreation.description == "" ) {
+function create() {
+    if (taskCreation.title == "" || taskCreation.description == "") {
         return;
     }
     game.createTask(taskCreation.title, taskCreation.description, new Date(taskCreation.duedate ?? new Date()));
+    close();
+}
+function close() {
+
     taskCreation.reset();
     showModal.value = false;
+
 }
 
 </script>
@@ -69,10 +74,15 @@ function close() {
                     <div class="md:flex md:items-center">
                         <div class="md:w-1/3"></div>
                         <div class="md:w-2/3 flex justify-end">
-                            <button
-                            type="submit"
-                                class="shadow bg-green-500 hover:bg-green-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
+                            <button type="submit"
+                                class="shadow    hover:bg-red-100 focus:shadow-outline focus:outline-none text-red-500 border-red-500  border-2 font-bold py-2 px-4 rounded"
                                 @click="close()">
+                                Cancel
+                            </button>
+                            <div class="w-4"></div>
+                            <button type="submit"
+                                class="shadow bg-green-500 hover:bg-green-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
+                                @click="create()">
                                 Adauga
                             </button>
                         </div>
@@ -106,34 +116,54 @@ function close() {
             </div>
             <div
                 class="row-span-2 col-span-2 w-auto rounded-2xl p-4 shadow-lg shadow-green-500 flex flex-col justify-between">
-                <li v-for="task in game.tasks" class="list-none">
-                    <div class="w-auto h-max shadow-md bg-white rounded-2xl py-5 px-10 ">
-                        <div class="flex justify-between">
-                            <div>
-                                <h1 class="text-green-700 font-bold">{{ task.title }}</h1>
-                                <p class="text-black">{{ task.description }}</p>
+                <div>
+                    <div class="flex flex-row justify-end py-5">
+                        <button id="show-modal" @click="showModal = true" data-modal-target="defaultModal"
+                            data-modal-toggle="defaultModal"
+                            class="w-max h-max p-4 rounded-md bg-red-500 hover:bg-red-400 active:bg-red-600">
+                            <h1 class="text-black font-bold select-none">Monstrii</h1>
+                        </button>
+                        <div class="w-4">
+                        </div>
+                        <button id="show-modal" @click="showModal = true" data-modal-target="defaultModal"
+                            data-modal-toggle="defaultModal"
+                            class="w-max h-max p-4 rounded-md bg-yellow-500 hover:bg-green-400 active:bg-green-600">
+                            <h1 class="text-black font-bold select-none">Misiuni</h1>
+                        </button>
+                    </div>
+                    <ul v-for="task in game.tasks" class="list-none" >
+
+                        <div class="w-auto h-max shadow-md bg-white rounded-2xl py-5 px-10 ">
+                            <div class="flex justify-between">
+                                <div>
+                                    <h1 class="text-green-700 font-bold">{{ task.title }}</h1>
+                                    <p class="text-black">{{ task.description }}</p>
+                                </div>
+                                <div>
+                                    <h1 class="text-black">
+                                        <span class="font-black text-red-500"> {{ game.calculateXP(task) }} </span>xp
+                                    </h1>
+                                    <h1 class="text-black">
+                                        <span class="font-black text-blue-700"> {{ game.calculateCompletionTime(task) }}
+                                        </span>sec
+                                    </h1>
+                                </div>
                             </div>
-                            <div>
-                                <h1 class="text-black">
-                                    <span class="font-black text-red-500"> {{ game.calculateXP(task) }} </span>xp
-                                </h1>
-                                <h1 class="text-black">
-                                    <span class="font-black text-blue-700"> {{ game.calculateCompletionTime(task) }}
-                                    </span>sec
-                                </h1>
-                            </div>
+                            <h1 class="text-black"><span class="font-black">Termen Limita: </span>
+                                <span v-if="task.dueDate != undefined">
+                                    {{ getDayOfTheWeek(task.dueDate.getDay()) }}, {{ task.dueDate.toLocaleString() }}
+                                </span>
+                            </h1>
 
                         </div>
-                        <h1 class="text-black"><span class="font-black">Termen Limita: </span>
-                            <span v-if="task.dueDate != undefined">
-                                {{ getDayOfTheWeek(task.dueDate.getDay()) }}, {{ task.dueDate.toLocaleString() }}
-                            </span>
-                        </h1>
+                        <div class="h-2">
 
-                    </div>
-                </li>
+                        </div>
+                    </ul>
+                </div>
                 <div class="flex flex-row justify-end py-5">
-                    <button id="show-modal" @click="showModal = true" data-modal-target="defaultModal" data-modal-toggle="defaultModal"
+                    <button id="show-modal" @click="showModal = true" data-modal-target="defaultModal"
+                        data-modal-toggle="defaultModal"
                         class="w-max h-max p-4 rounded-md bg-green-500 hover:bg-green-400 active:bg-green-600">
                         <h1 class="text-black font-bold select-none">Adauga</h1>
                     </button>

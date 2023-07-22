@@ -136,7 +136,7 @@ export const useGameStore = defineStore('game', {
           totalXPBoost: 1,
         }
       },
-      tasks: [new Task("", "Fa un dus!!", "Este foarte dificil pentru programator sa faca acesta actiune. Difficulty: Impossible", new Date(), 12, TaskType.userCreated, 1)] as Task[],
+      tasks: [] as Task[],
       jobs: [] as CompletionJob[],
       waiting: {
         quests: [] as Task[],
