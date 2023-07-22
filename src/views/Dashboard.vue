@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useGameStore } from '@/stores/game'
 import { useTaskCreationStore } from '@/stores/task_creation'
-import { ref } from 'vue';
 const game = useGameStore()
 const taskCreation = useTaskCreationStore();
 
@@ -10,27 +9,15 @@ const daysOfTheWeek = ["Luni", "Marti", "Miercuri", "Joi", "Vineri", "Sambata", 
 function getDayOfTheWeek(day: number) {
     return daysOfTheWeek[day + 1];
 }
-
-var showModal = ref(false);
-function create() {
-    if (taskCreation.title == "" || taskCreation.description == "") {
-        return;
-    }
-    game.createTask(taskCreation.title, taskCreation.description, new Date(taskCreation.duedate ?? new Date()));
-    close();
-}
-function close() {
-
-    taskCreation.reset();
-    showModal.value = false;
-
+function doSomethin() {
+    alert("something")
 }
 
 </script>
 
 <template>
     <main>
-        <div v-if="showModal" @close="close()"
+        <div v-if="taskCreation.isModalShown" @close="taskCreation.close()"
             class="fixed z-40 top-0 left-0  w-full h-full m-0 p-0 bg-slate-950/50 grid place-items-center">
             <div class="w-300 margin-0 p-5 bg-white rounded-md shadow-md modal-container font-sans">
                 <form class="w-full max-w-sm">
@@ -76,22 +63,32 @@ function close() {
                         <div class="md:w-2/3 flex justify-end">
                             <button type="submit"
                                 class="shadow    hover:bg-red-100 focus:shadow-outline focus:outline-none text-red-500 border-red-500  border-2 font-bold py-2 px-4 rounded"
-                                @click="close()">
+                                @click="taskCreation.close()">
                                 Cancel
                             </button>
                             <div class="w-4"></div>
-                            <button type="submit"
+
+                            <button v-if="taskCreation.isCreationMode()" type="submit"
                                 class="shadow bg-green-500 hover:bg-green-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
-                                @click="create()">
+                                @click="taskCreation.submitCreation()">
                                 Adauga
+                            </button>
+
+                            <button v-else
+                                class="shadow bg-yellow-500 hover:bg-yellow-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
+                                @click="taskCreation.submitEdit()">
+                                Editeaza
                             </button>
                         </div>
                     </div>
                 </form>
 
             </div>
-
         </div>
+
+
+
+
 
         <div class="grid grid-rows-3 grid-flow-col gap-4 ">
             <div class="row-span-1  rounded-2xl p-4 shadow-lg shadow-gray-300">
@@ -118,21 +115,20 @@ function close() {
                 class="row-span-2 col-span-2 w-auto rounded-2xl p-4 shadow-lg shadow-green-500 flex flex-col justify-between">
                 <div>
                     <div class="flex flex-row justify-end py-5">
-                        <button id="show-modal" @click="showModal = true" data-modal-target="defaultModal"
+                        <button id="show-modal" @click="taskCreation.isModalShown = true" data-modal-target="defaultModal"
                             data-modal-toggle="defaultModal"
                             class="w-max h-max p-4 rounded-md bg-red-500 hover:bg-red-400 active:bg-red-600">
                             <h1 class="text-black font-bold select-none">Monstrii</h1>
                         </button>
                         <div class="w-4">
                         </div>
-                        <button id="show-modal" @click="showModal = true" data-modal-target="defaultModal"
+                        <button id="show-modal" @click="taskCreation.isModalShown = true" data-modal-target="defaultModal"
                             data-modal-toggle="defaultModal"
                             class="w-max h-max p-4 rounded-md bg-yellow-500 hover:bg-green-400 active:bg-green-600">
                             <h1 class="text-black font-bold select-none">Misiuni</h1>
                         </button>
                     </div>
-                    <ul v-for="task in game.tasks" class="list-none" >
-
+                    <ul v-for="task in game.tasks" class="list-none">
                         <div class="w-auto h-max shadow-md bg-white rounded-2xl py-5 px-10 ">
                             <div class="flex justify-between">
                                 <div>
@@ -154,6 +150,23 @@ function close() {
                                     {{ getDayOfTheWeek(task.dueDate.getDay()) }}, {{ task.dueDate.toLocaleString() }}
                                 </span>
                             </h1>
+                            <div class="flex flex-row justify-end pt-5">
+                                <button v-if="task.isUserCreated()" id="show-modal"
+                                    @click="taskCreation.showEditModal(task)" data-modal-target="defaultModal"
+                                    data-modal-toggle="defaultModal"
+                                    class="w-max h-max px-4 py-2 rounded-md bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600">
+                                    <h1 class="text-black font-bold select-none">Editeaza</h1>
+                                </button>
+                                <div class="w-4">
+                                </div>
+                                <button id="show-modal" @click="game.deleteTask(task)"
+                                    class="w-max h-max px-4 py-2 rounded-md bg-red-500 hover:bg-red-400 active:bg-red-600">
+                                    <h1 class="text-black font-bold select-none">Sterge</h1>
+                                </button>
+
+
+                            </div>
+
 
                         </div>
                         <div class="h-2">
@@ -162,7 +175,7 @@ function close() {
                     </ul>
                 </div>
                 <div class="flex flex-row justify-end py-5">
-                    <button id="show-modal" @click="showModal = true" data-modal-target="defaultModal"
+                    <button id="show-modal" @click="taskCreation.showCreationModal()" data-modal-target="defaultModal"
                         data-modal-toggle="defaultModal"
                         class="w-max h-max p-4 rounded-md bg-green-500 hover:bg-green-400 active:bg-green-600">
                         <h1 class="text-black font-bold select-none">Adauga</h1>

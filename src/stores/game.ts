@@ -81,6 +81,11 @@ export class Task {
     this.difficulty = difficulty;
   }
 
+  isUserCreated(){
+    return this.type === TaskType.userCreated;
+
+  }
+
   copyWith(taskInterface: TaskCloning) {
     return new Task(
       taskInterface.id ?? this.id,
@@ -166,14 +171,16 @@ export const useGameStore = defineStore('game', {
       this.tasks.push(task);
     },
 
-    editUserTask(task: Task, title: string, description: string, duedate: Date) {
+    editUserTask(task: Task, title: string, description: string, duedate: Date | undefined) {
       if (task.type != TaskType.userCreated) return;
       var index = this.tasks.indexOf(task);
-      this.tasks[index] = this.tasks[index].copyWith({
+      var newTask = this.tasks[index].copyWith({
         title: title,
         description: description,
         dueDate: duedate,
       });
+      this.tasks[index] = newTask;
+
     },
 
     addArtifact(artifact: Artifact) {
@@ -203,6 +210,11 @@ export const useGameStore = defineStore('game', {
       this.jobs.push(CompletionJob.create(task.id, time, xp));
     },
 
+    deleteTask(task : Task) {
+      let indexOf = this.tasks.findIndex(e => e.id == task.id);
+      this.tasks.splice(indexOf, 1);
+    },
+
     /// returns false if it's too early, true if it's ok
     markTaskAsComplete(job: CompletionJob, currentTime: Date) {
       if (job.endDate > currentTime) return false;
@@ -211,7 +223,7 @@ export const useGameStore = defineStore('game', {
       if (indexOfJob != undefined) {
         this.jobs.splice(indexOfJob, 1);
       }
-      let indexOf = this.tasks.findIndex(e => e.id == job.id);
+      let indexOf = this.tasks.findIndex(e => e.id == job.taskId);
       this.tasks.splice(indexOf, 1);
       return true;
     },
