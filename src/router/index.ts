@@ -9,6 +9,16 @@ const router = createRouter({
       name: 'dashboard',
       component: () => import('../views/Dashboard.vue')
     },
+    {
+      path: '/monsters',
+      name: 'monsters',
+      component: () => import('../views/MonsterArenaView.vue')
+    },
+    {
+      path: '/quests',
+      name: 'quests',
+      component: () => import('../views/QuestBoardView.vue')
+    },
   ]
 })
 
