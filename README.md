@@ -1,4 +1,4 @@
-# TaskTracer 
+# Task Tracker Adventure: Save the Kingdom!
 
 TaskTracer is an innovative web application that aims to make task management and completing chores more enjoyable by transforming them into exciting quests and challenging monster battles. This documentation will guide you through the various components and features of the TaskTracer project.
 
