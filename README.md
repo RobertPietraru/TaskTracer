@@ -1,62 +1,51 @@
-# Task tracer
+# TaskTracer 
 
-The hero starts at level 1 with 0 XP and an empty task list.
-The hero can view the Quest Board and choose a quest to accept. Accepting a
-quest adds it to their active tasks.
-The hero can view the Monster Arena and add monster-related tasks to their
-active tasks to prepare for the battle.
-The hero can manage their tasks and mark them as completed to gain XP.
-Completing tasks, quests, and defeating monsters grants XP and moves the hero
-closer to defeating the evil sorcerer.
+TaskTracer is an innovative web application that aims to make task management and completing chores more enjoyable by transforming them into exciting quests and challenging monster battles. This documentation will guide you through the various components and features of the TaskTracer project.
 
-Hero Dashboard: Display the hero's profile with their name, level, and current
-experience points (XP). Also, show the list of active tasks the hero needs to
-complete.
+## Requirements
 
-Quest Board: List quests that the hero can take on to gain XP. Each quest has a
-task description, due date, and XP reward. The hero can choose to accept a
-quest, which will add it to their active tasks.
+Before running TaskTracer locally, ensure you have the node installed on your system:
 
-Artifacts Inventory: Allow the hero to gather powerful artifacts during their
-quests. Artifacts provide **bonus XP** or reduce **task completion time**.
+## Installation
 
-Monster Arena: Display menacing monsters the hero needs to defeat. Each
-monster has a task description, due date (time until the monster attacks the
-kingdom), and XP reward. The hero can add monster-related tasks to their active
-tasks and defeat monsters by completing these tasks.
+To set up TaskTracer on your local machine, follow these steps:
 
-Task Management: The hero can add, edit, and delete tasks from their active
-tasks. They can also mark tasks as completed.
+1. Clone the repository from GitHub:
 
-Level Up: As the hero gains XP, their level increases. Higher levels unlock new
-quests and artifacts.
+```bash
+git clone https://github.com/RobertPietraru/TaskTracer.git
+```
 
+2. Navigate to the project folder:
 
-# Pages
-## Hero dashboard
-1. Profile 
-    - name
-    - level
-    - XP
-2. Tasks
-Left side profile (avatar on top, information below). Layout is |   "NAME" • level
-                                                                |1 -----------10xp---2
-                                                                | Inventory
-                                                                | [item] [item] [item]
-                                                                | [item] [item] [item]
-                                                                | [item] [item] [item]
-Right side tasks (list). Layout is 
-                                   | Quest board        [Explore quests]
-                                   | quest 1 [complete] [give up]
-                                   | quest 2 [complete] [give up]
-                                   | task 3    [complete] [edit]  [delete]
+```bash
+cd TaskTracer
+```
 
-## Quest Board
-A list of all the possible quests based on the level
+3. Install the required dependencies:
 
-## Monster arena
+```bash
+npm install
+```
 
-Monster(Task):
-- task description
-- due date 
-- xp reward
+4. Start the development server:
+
+```bash
+npm run dev
+```
+
+### Dashboard
+
+The Dashboard component displays the user profile, task list (including user-created tasks, quests, and monsters), and artifacts list. It shows the user's name, XP, and level. The equipped artifacts are also displayed, providing speed boosts or increased XP for tasks.
+
+### MonsterBoard and QuestBoard
+
+Both the MonsterBoard and the QuestBoard components present a list of available monster tasks. Users can accept tasks and their successful completion results in earning XP and rewards.
+
+## Task Calculation
+
+TaskTracer calculates the XP and completion time for each task based on the user's level and equipped artifacts. The complexity of quests and monsters is dynamically adjusted according to the user's level and artifact bonuses.
+
+## Stack
+
+TaskTracer utilizes Vue.js, Pinia for state management and Tailwind CSS for styling
