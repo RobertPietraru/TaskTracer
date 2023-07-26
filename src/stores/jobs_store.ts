@@ -5,17 +5,28 @@ import { defineStore } from 'pinia'
 export const useJobsStore = defineStore('jobs', {
   state: () => {
     return {
-      jobs : new Map() as Map<string, CompletionJob>
+      jobs : [] as CompletionJob[]
     }
   },
   actions: {
     create(task : Task, time : number, xp : number) {
-      if (this.jobs.has(task.id)) return;
-      this.jobs.set(task.id, CompletionJob.create(task.id, time, xp));
+      this.jobs.push(CompletionJob.create(task.id, time, xp));
     },
 
-    remove(id : string) {
-      this.jobs.delete(id);
+    remove(index : number) {
+      this.jobs.splice(index, 1);
     },
+    jobFor(task : Task){
+      for (let i = 0; i < this.jobs.length; i++) {
+        if (this.jobs[i].taskId == task.id) return this.jobs[i];
+      }
+      return undefined;
+    },
+
+    hasJobFor(task : Task) {
+      return this.jobFor(task) != undefined
+
+      
+    }
   },
 })

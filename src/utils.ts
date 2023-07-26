@@ -1,4 +1,3 @@
-import type { Task } from "./models/task";
 
 export function generateUUID(): string { // Public Domain/MIT
   var d = new Date().getTime();//Timestamp

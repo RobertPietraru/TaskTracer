@@ -15,9 +15,13 @@ export const useTasksStore = defineStore('tasks', {
       this.tasks.push(Task.createWith(title, description, duedate));
     },
     
-    remove(index : number){
+    removeAt(index : number){
         this.tasks.splice(index, 1);
     },
+
+    removeTask(task : Task){
+      this.tasks.splice(this.tasks.indexOf(task), 1);
+  },
 
     update(index : number, title: string | undefined, description: string | undefined, duedate: Date | undefined) {
       var task = this.tasks[index];
@@ -32,6 +36,9 @@ export const useTasksStore = defineStore('tasks', {
 
     get(){
       return this.tasks;
+    }
+    , add(task : Task){
+      this.tasks.push(task)
     }
   },
 })

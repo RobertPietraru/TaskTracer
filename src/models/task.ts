@@ -1,15 +1,15 @@
 import { generateUUID, randomNumber } from "@/utils";
 
 export interface TaskCloning {
-    id?: string,
-    title?: string,
-    description?: string,
-    dueDate?: Date,
-    type?: TaskType,
-    difficulty?: number,
-  }
+  id?: string,
+  title?: string,
+  description?: string,
+  dueDate?: Date,
+  type?: TaskType,
+  difficulty?: number,
+}
 
-  export enum TaskType { monster, quest, userCreated, }
+export enum TaskType { monster, quest, userCreated, }
 export class Task {
   id: string;
   title: string;
@@ -42,11 +42,6 @@ export class Task {
       taskInterface.type ?? this.type,
       taskInterface.difficulty ?? this.difficulty,
     );
-  }
-
-  static createRandom(type: TaskType) {
-    var difficulty = randomNumber(10, 100);
-    return new Task(generateUUID(), "A title", "descrption", new Date('1995-12-17T03:24:00'), type, difficulty);
   }
 
   static createWith(title: string, description: string, duedate: Date | undefined) {
